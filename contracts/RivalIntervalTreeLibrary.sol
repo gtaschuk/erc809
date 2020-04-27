@@ -84,36 +84,44 @@ library RivalIntervalTreeLibrary {
         return(key, self.nodes[key].end, self.nodes[key].parent, self.nodes[key].left, self.nodes[key].right, self.nodes[key].red);
     }
 
+    function findParent(Tree storage self, uint256 key) private view returns (uint) {
+      uint cursor = EMPTY;
+      uint probe = self.root;
+      while (probe != EMPTY) {
+        cursor = probe;
+        if (key < probe) {
+          probe = self.nodes[probe].left;
+        } else {
+          probe = self.nodes[probe].right;
+        }
+      }
+      return cursor;
+    }
+
     function overlaps(Tree storage self, uint key, uint end) view internal returns (bool) {
         require(key != EMPTY);
         require(!exists(self, key));
-        uint cursor = EMPTY;
-        uint probe = self.root;
-        while (probe != EMPTY) {
-            cursor = probe;
-            if (key < probe) {
-                probe = self.nodes[probe].left;
-            } else {
-                probe = self.nodes[probe].right;
-            }
-        }
+        uint cursor = findParent(self, key);
 
         // special case for first insert
         if (cursor == EMPTY) {
             return false;
         }
-        else if (key < cursor) {
+
+        Node memory referencedNode = self.nodes[cursor];
+        // reservation starts before
+        if (key < cursor) {
           uint prevCursor = prev(self, cursor);
           uint prevEnd = self.nodes[prevCursor].end;
 
           bool overlap = (end > cursor) || (key < prevEnd);
           return overlap;
+        // reservation starts after
         } else {
-          Node memory referencedNode = self.nodes[cursor];
 
           uint nextCursor = prev(self, cursor);
           
-          bool overlap = (key < referencedNode.end) || (end > nextCursor);
+          bool overlap = (key < referencedNode.end) || ((nextCursor != EMPTY) && (end > nextCursor));
           return overlap;
         }
     }
@@ -121,16 +129,7 @@ library RivalIntervalTreeLibrary {
     function insert(Tree storage self, uint256 key, uint256 end) public {
         require(key != EMPTY);
         require(!exists(self, key));
-        uint cursor = EMPTY;
-        uint probe = self.root;
-        while (probe != EMPTY) {
-            cursor = probe;
-            if (key < probe) {
-                probe = self.nodes[probe].left;
-            } else {
-                probe = self.nodes[probe].right;
-            }
-        }
+        uint cursor = findParent(self, key);
 
         Node memory node = Node({parent: cursor, left: EMPTY, right: EMPTY, end: end, red: true});
 
@@ -141,7 +140,8 @@ library RivalIntervalTreeLibrary {
             insertFixup(self, key);
             return;
         }
-        else if (key < cursor) {
+
+        if (key < cursor) {
           uint prevCursor = prev(self, cursor);
           uint prevEnd = self.nodes[prevCursor].end;
 

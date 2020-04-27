@@ -16,6 +16,7 @@ contract ERC809 is ERC721 {
     Approved,
     Cancelled
   }
+
   struct Reservation {
     uint256 tokenId;
     address renter;
@@ -23,7 +24,6 @@ contract ERC809 is ERC721 {
     uint256 end;
     ReservationStatus status;
   }
-
 
   mapping(uint256 => RivalIntervalTreeLibrary.Tree) calendars;
   mapping(uint256 => mapping(uint256 => Reservation)) reservations;
@@ -77,12 +77,13 @@ contract ERC809 is ERC721 {
   /// @notice Find the renter of an NFT token as of `_time`
   /// @dev The renter is who made a reservation on `_tokenId` and the reservation spans over `_time`.
   function renterOf(uint256 _tokenId, uint256 _time) public view returns (address) {
+    // TODO - look for bounding interval
     return reservations[_tokenId][_time].renter;
   }
 
   /// @notice Query if token `_tokenId` if available to reserve between `_start` and `_end` time
   function checkAvailable(uint256 _tokenId, uint256 _start, uint256 _end) public view returns (bool available) {
-    return calendars[_tokenId].overlaps(_start, _end);
+    return !calendars[_tokenId].overlaps(_start, _end);
   }
 }
 

@@ -31,13 +31,29 @@ contract("ERC809", accounts => {
         await token.reserve(propertyId, 10, 15)
       })
 
-      it('should allow you to make a non-overlapping reservation', async () => {
-        await token.reserve(propertyId, 20, 25)
+      it('should allow you to make a non-overlapping reservation before', async () => {
+        let start = 1, end = 5
+        let available = await token.checkAvailable(propertyId, start, end)
+
+        assert(available, "property should be available")
+        await token.reserve(propertyId, 1, 5)
+      })
+
+      it('should allow you to make a non-overlapping reservation after', async () => {
+        let start = 20, end = 25
+        let available = await token.checkAvailable(propertyId, start, end)
+
+        assert(available, "property should be available")
+        await token.reserve(propertyId, start, end)
       })
 
       it('should not allow you to make an overlapping reservation ending during', async () => {
+        let start = 7, end = 12
+        let available = await token.checkAvailable(propertyId, start, end)
+
+        assert(!available, "property should not be available")
         try {
-          await token.reserve(propertyId, 7, 12)
+          await token.reserve(propertyId, start, end)
         } catch (error) {
           return
         }
@@ -45,12 +61,25 @@ contract("ERC809", accounts => {
       })
 
       it('should not allow you to make an overlapping reservation beginning during', async () => {
+        let start = 13, end = 18
+        let available = await token.checkAvailable(propertyId, start, end)
+
+        assert(!available, "property should not be available")
         try {
-          await token.reserve(propertyId, 13, 18)
+          await token.reserve(propertyId, start, end)
         } catch (error) {
           return
         }
         assert(false)
+      })
+
+      it('should allow you to delete a reservation', async () => {
+        await token.cancelReservation(propertyId, 10)
+
+        let start = 9, end = 18
+        let available = await token.checkAvailable(propertyId, start, end)
+
+        assert(available, "property should be available once reservation is cancelled")
       })
     })
   })
