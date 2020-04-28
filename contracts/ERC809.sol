@@ -49,7 +49,7 @@ contract ERC809 is ERC721 {
   function reserve(uint256 _tokenId, uint256 _start, uint256 _end) external returns (bool success) {
     // Reverts if impossible
     calendars[_tokenId].insert(_start, _end);
-    // TODO check for overlaps with accepted reservations
+
     Reservation memory r = Reservation(
       _tokenId,
       msg.sender,

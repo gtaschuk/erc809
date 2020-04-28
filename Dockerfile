@@ -8,6 +8,8 @@ COPY package.json .
 COPY yarn.lock .
 RUN yarn install
 
+RUN mkdir -p ./app/src/contracts
+
 COPY contracts contracts
 COPY migrations migrations 
 COPY build build

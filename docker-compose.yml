@@ -16,6 +16,7 @@ services:
       retries: 5
     volumes:
       - ./build:/usr/src/app/build
+      - ./app/src/contracts:/usr/src/app/app/src/contracts
   block-explorer:
     image: alethio/ethereum-lite-explorer
     environment:
