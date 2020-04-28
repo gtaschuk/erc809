@@ -1,5 +1,8 @@
 ## ERC809
 
+[![Passing](https://circleci.com/gh/gtaschuk/erc809.svg?style=svg)](https://circleci.com/gh/gtaschuk/erc809/master)
+
+
 This is a work in progress implementation of the ERC-809 standard for renting nonfungible ERC-721 tokens.
 
 It uses a red black interval tree to prevent multiple people from using an asset at the same time.
